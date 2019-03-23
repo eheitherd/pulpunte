@@ -1,0 +1,41 @@
+{
+  "name": "pulpunte",
+  "version": "0.0.1",
+  "description": "Experimental build tool for PureScript",
+  "author": "Eheitherd Ceres",
+  "keywords": [],
+  "license": "MIT",
+  "bin": "./bin/pulpunte",
+  "files": [
+    "bin",
+    "lib",
+    "package.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "pulp build -t lib/cli.js",
+    "watch": "pulp -w build -t lib/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eheitherd/pulpunte.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eheitherd/pulpunte/issues"
+  },
+  "homepage": "https://github.com/eheitherd/pulpunte#readme",
+  "dependencies": {
+    "execa": "^1.0.0",
+    "fs-extra": "^7.0.1",
+    "isomorphic-git": "^0.51.12",
+    "term-size": "^1.2.0",
+    "yargs": "^13.2.1"
+  },
+  "devDependencies": {
+    "bower": "^1.8.8",
+    "pulp": "^12.3.1",
+    "purescript": "^0.12.3",
+    "purescript-psa": "^0.7.3"
+  }
+}
