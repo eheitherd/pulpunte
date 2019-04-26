@@ -3,7 +3,14 @@
   "version": "0.0.1",
   "description": "Experimental build tool for PureScript",
   "author": "Eheitherd Ceres",
-  "keywords": [],
+  "keywords": [
+    "purescript",
+    "package-sets",
+    "build",
+    "build-tool",
+    "cli",
+    "npm"
+  ],
   "license": "MIT",
   "bin": "./bin/pulpunte",
   "files": [
