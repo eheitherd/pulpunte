@@ -1,6 +1,6 @@
 {
   "name": "pulpunte",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Experimental build tool for PureScript",
   "author": "Eheitherd Ceres",
   "keywords": [
