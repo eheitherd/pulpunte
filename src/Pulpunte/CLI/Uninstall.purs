@@ -92,12 +92,11 @@ removePackageFiles console config info = do
     console.info $ msg.uninstall.done $ length needPackages
 
   where
-    dependencyError packageName =
-      if packageName `elem` info.specifiedPackages
-        then throwError' $ msg.uninstall.errStillNeeded $ console.strong packageName
-        else do
-          console.warn $ msg.uninstall.brokenDependencies $ console.strong packageName
-          pure info.specifiedPackages
+    dependencyError =
+      ifM (_ `elem` info.specifiedPackages)
+        (throwError' ∘ msg.uninstall.errStillNeeded ∘ console.strong)
+        ((info.specifiedPackages <$ _) ∘ console.warn
+                     ∘ msg.uninstall.brokenDependencies ∘ console.strong)
 
     addPath = \packageName →
       packageName × concat [packageSetDir config.packageSet, packageName]

@@ -29,7 +29,7 @@ run ∷ Console → RunOptions → Array FilePath → Aff Unit
 run console options srcPaths = do
   when options.clean $ remove options.output
 
-  output ← flip catchError (const $ throwError' msg.build.fail) do
+  output ← flip catchError (\_ → throwError' msg.build.fail) do
 
     compile { stdout: stderr, stderr } options.output srcPaths
     console.newline
