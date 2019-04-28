@@ -21,6 +21,7 @@ import Pulpunte.Purs (bundle, compile)
 type RunOptions =
   { output ∷  FilePath
   , entryModule ∷ Maybe String
+  , watch ∷ Boolean
   , clean ∷ Boolean
   }
 

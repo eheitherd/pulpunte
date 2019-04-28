@@ -100,30 +100,33 @@ uninstallCmd = command "uninstall" ["u"] (Just desc.uninstall.command) $
 buildCmd ∷ Command GlobalOptions
 buildCmd = command "build" ["b"] (Just desc.build.command) $
   launchCmd build $
-    { output: _, to: _, entryModule: _, skipBundle: _, skipEntryPoint: _, clean: _ }
+    { output: _, to: _, entryModule: _, skipBundle: _, skipEntryPoint: _, watch: _, clean: _ }
       <$> cmdYarg "output" ["o"] (Just desc.build.output) (Left "output") true
       <*> cmdYargOptional "to" ["t"] (Just desc.build.to) "" true
       <*> cmdYargOptional "module" ["m"] (Just desc.build.entryModule) "" true
       <*> cmdFlag "skip-bundle" [] (Just desc.build.skipBundle)
       <*> cmdFlag "skip-entry-point" [] (Just desc.build.skipEntryPoint)
+      <*> cmdFlag "watch" ["w"] (Just desc.build.watch)
       <*> cmdFlag "clean" ["c"] (Just desc.build.clean)
 
 
 runCmd ∷ Command GlobalOptions
 runCmd = command "run" ["r"] (Just desc.run.command) $
   launchCmd run $
-    { output: _, entryModule: _, clean: _ }
+    { output: _, entryModule: _, watch: _, clean: _ }
       <$> cmdYarg "output" ["o"] (Just desc.build.output) (Left "output") true
       <*> cmdYargOptional "module" ["m"] (Just desc.build.entryModule) "" true
+      <*> cmdFlag "watch" ["w"] (Just desc.build.watch)
       <*> cmdFlag "clean" ["c"] (Just desc.build.clean)
 
 
 testCmd ∷ Command GlobalOptions
 testCmd = command "test" ["t"] (Just desc.test.command) $
   launchCmd test $
-    { output: _, entryModule: _, clean: _ }
+    { output: _, entryModule: _, watch: _, clean: _ }
       <$> cmdYarg "output" ["o"] (Just desc.build.output) (Left "output") true
       <*> cmdYargOptional "module" ["m"] (Just desc.build.entryModule) "" true
+      <*> cmdFlag "watch" ["w"] (Just desc.build.watch)
       <*> cmdFlag "clean" ["c"] (Just desc.build.clean)
 
 

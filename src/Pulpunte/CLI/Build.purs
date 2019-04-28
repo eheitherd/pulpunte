@@ -13,6 +13,7 @@ import Node.Execa (stderr, stdout)
 import Node.FS.Extra (remove)
 import Node.Path (FilePath)
 import Prelude.Unicode ((∘))
+import Pulpunte.Builder (runBuilder)
 import Pulpunte.Console (Console)
 import Pulpunte.Message (msg)
 import Pulpunte.Purs (bundle, compile)
@@ -24,6 +25,7 @@ type BuildArgs =
   , entryModule ∷ Maybe String
   , skipBundle ∷ Boolean
   , skipEntryPoint ∷ Boolean
+  , watch ∷ Boolean
   , clean ∷ Boolean
   }
 
@@ -38,27 +40,26 @@ build console args = do
 
   when args.clean $ remove args.output
 
-  flip catchError (const $ throwError' msg.build.fail) do
-    let
-      bundleStdout = not args.skipBundle && isNothing args.to
-      srcPaths =
+  let srcPaths =
         [ "src/**/*.purs"
         , ".pulpunte/*/*/src/**/*.purs"
         ]
 
-    compile { stdout: stderr, stderr } args.output srcPaths
-    console.newline
+  runBuilder console args.watch srcPaths \paths →
+    flip catchError (\_ → throwError' msg.build.fail) do
+      compile { stdout: stderr, stderr } args.output paths
+      console.newline
 
-    unless args.skipBundle do
-      console.info $ maybe msg.build.bundlingStdout
-                           (msg.build.bundling ∘ console.em) args.to
+      unless args.skipBundle do
+        console.info $ maybe msg.build.bundlingStdout
+                            (msg.build.bundling ∘ console.em) args.to
 
-      _ ← bundle { stdout, stderr } args.output
-        { output: args.to
-        , entryModule: args.entryModule
-        , entryPoint: not args.skipEntryPoint
-        }
+        _ ← bundle { stdout, stderr } args.output
+          { output: args.to
+          , entryModule: args.entryModule
+          , entryPoint: not args.skipEntryPoint
+          }
 
-      when (isNothing args.to) console.newline
+        when (isNothing args.to) console.newline
 
-    console.info msg.build.done
+      console.info msg.build.done

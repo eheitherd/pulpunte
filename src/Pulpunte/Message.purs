@@ -47,6 +47,7 @@ desc =
     , entryModule: "Entry point module name (default: \"Main\")"
     , skipBundle: "Don't bundle compiled files after compiling"
     , skipEntryPoint: "Don't generate code to run the main method in the entry module"
+    , watch: "Watch the source files for changes"
     , clean: "Delete all compiled files before compiling"
     }
   , run:
@@ -54,7 +55,6 @@ desc =
     }
   , test:
     { command: "Run project tests."
-    , watch: "Not implemented yet"
     }
   }
 
