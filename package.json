@@ -19,6 +19,9 @@
     "package.json",
     "README.md"
   ],
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "scripts": {
     "build": "pulp build -t lib/cli.js",
     "watch": "pulp -w build -t lib/cli.js",
