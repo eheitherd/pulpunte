@@ -28,8 +28,9 @@ import Pulpunte.PackageSet (PackageSet, Packages, getPackageSet, packageSetDir, 
 
 installAll ∷ Console → Int → Config → Aff Unit
 installAll console jobs config = do
-  let additions = fromMaybe empty config.additions
+  let additions = fromMaybe empty (config.additions <> config.devAdditions)
       packageList = nub $ keys additions <> config.dependencies
+                                         <> fromMaybe [] config.devDependencies
 
   installPackages console jobs config.packageSet additions packageList
 

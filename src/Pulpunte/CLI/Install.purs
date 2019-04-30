@@ -10,13 +10,14 @@ import Data.Array.NonEmpty (head, length)
 import Data.Array.Unicode ((∩))
 import Data.Function (on)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Monoid (guard)
 import Data.Profunctor.Strong ((&&&))
 import Data.Traversable (sequence, traverse)
 import Data.Tuple (fst)
 import Data.Tuple.Unicode (type (×))
 import Effect.Aff (Aff)
 import Effect.Aff.Util (throwError')
-import Foreign.Object (Object, empty, fromFoldable, keys, toUnfoldable, union)
+import Foreign.Object (empty, fromFoldable, keys, toUnfoldable)
 import Prelude.Unicode ((∘))
 import Pulpunte.CLI.Install.Parser (parsePackage)
 import Pulpunte.Config (Config, readConfig, writeConfig)
@@ -29,25 +30,29 @@ import Pulpunte.PackageSet (PackageInfo, getPackageInfo, getPackageSet)
 
 type InstallArgs =
   { packages ∷ Array String
+  , saveDev ∷ Boolean
   , jobs ∷ Int
   }
 
 
 install ∷ Console → InstallArgs → Aff Unit
-install console { packages: packageList, jobs } = do
+install console { packages: packageList, saveDev, jobs } = do
   config ← readConfig
 
   if null packageList
-    then installAll console jobs config
-    else installNew console jobs config packageList
+    then do
+      when saveDev $ console.warn msg.install.ignoreSaveDev
+      installAll console jobs config
+    else
+      installNew console jobs config saveDev packageList
 
 
-installNew ∷ Console → Int → Config → Array String → Aff Unit
-installNew console jobs config packageList = do
+installNew ∷ Console → Int → Config → Boolean → Array String → Aff Unit
+installNew console jobs config saveDev packageList = do
   let packageNamesWithPlaces = parsePackage <$> packageList
       packageNames = fst <$> packageNamesWithPlaces
-      duplicated = head <$> filter ((_ > 1) ∘ length) (group packageNames)
 
+  let duplicated = head <$> filter ((_ > 1) ∘ length) (group packageNames)
   unless (null duplicated) $
     throwError' $ msg.install.errDuplicated $ console.strong <$> duplicated
 
@@ -57,35 +62,53 @@ installNew console jobs config packageList = do
                                                     packageNamesWithPlaces
 
   let additions = fromMaybe empty config.additions
-      dependencies = keys additions <> config.dependencies
-      installed = packageNames ∩ dependencies
+      devAdditions = fromMaybe empty config.devAdditions
+      devDependencies = fromMaybe [] config.devDependencies
+      allDependencies = keys additions <> config.dependencies
+                     <> keys devAdditions <> devDependencies
 
+  let installed = packageNames ∩ allDependencies
   unless (null installed) $
-    console.warn $ msg.install.alreadyInstalled $ console.strong <$> installed
+    throwError' $ msg.install.alreadyInstalled $ console.strong <$> installed
 
-  let notInstalled = packageNames \\ dependencies
+  let notInstalled = packageNames \\ allDependencies
       newAdditionList = catMaybes $ sequence <$> packageNamesWithInfos
-      newAdditions = fromFoldable newAdditionList `union` additions
-      newDependencies = notInstalled \\ (fst <$> newAdditionList)
 
-  installPackages console jobs config.packageSet newAdditions packageNames
+  let dependableAdditions = fromFoldable newAdditionList
+                         <> additions <> guard saveDev devAdditions
+  installPackages console jobs config.packageSet dependableAdditions packageNames
 
   unless (null notInstalled) do
-    writeConfig $
-      config
-        { dependencies = sort $ config.dependencies <> newDependencies
-        , additions = updateAddition config.additions newAdditionList
-        }
+    writeConfig $ updateConfig saveDev newAdditionList notInstalled config
     console.info $ msg.install.addedToDeps $ console.em <$> notInstalled
 
 
-updateAddition
-   ∷ Maybe (Object PackageInfo)
+updateConfig
+   ∷ Boolean
   → Array (PackageName × PackageInfo)
-  → Maybe (Object PackageInfo)
-updateAddition additions newAdditionList
-  | Just infos ← additions
-      = Just $ fromFoldable $ sortWith fst $ nubByEq (eq `on` fst)
-                            $ newAdditionList <> toUnfoldable infos
-  | otherwise = newAdditionList
-      # ifM null (const Nothing) (Just ∘ fromFoldable ∘ sortWith fst)
+  → Array PackageName
+  → Config
+  → Config
+updateConfig saveDev newAdditionList newPackages config =
+  let newDependencies = newPackages \\ (fst <$> newAdditionList)
+   in if saveDev
+        then config
+          { devDependencies = updateDevDependencies config.devDependencies newDependencies
+          , devAdditions = updateAddition config.devAdditions newAdditionList
+          }
+        else config
+          { dependencies = sort $ config.dependencies <> newDependencies
+          , additions = updateAddition config.additions newAdditionList
+          }
+
+  where
+    updateDevDependencies devDependencies newDependencies =
+      if null newDependencies
+        then devDependencies
+        else Just $ sort $ newDependencies <> fromMaybe [] devDependencies
+
+    updateAddition additions newAdditionList' =
+      if null newAdditionList'
+        then additions
+        else Just $ fromFoldable $ sortWith fst $ nubByEq (eq `on` fst)
+                  $ newAdditionList' <> toUnfoldable (fromMaybe empty additions)

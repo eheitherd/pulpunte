@@ -35,6 +35,7 @@ desc =
         , "a URL (e.g. \"https://github.com/purescript/purescript-arrays.git\")"
         , "with a version (e.g. \"arrays@v5.2.1\", \"purescript/arrays@latest\")"
         ]
+    , saveDev: "Save installed packages into devDependencies or devAdditions"
   , jobs: "Parallelize jobs with specific number."
     }
   , uninstall:
@@ -77,6 +78,9 @@ msg =
         <> " package"
         <> (if num == 1 then " has" else "s have")
         <> " been installed."
+    , ignoreSaveDev:
+           "Option `--save-dev` will be ignored,"
+        <> " because no packages are specified."
     , alreadyInstalled: \packages →
            "Package "
         <> intercalate ", " packages

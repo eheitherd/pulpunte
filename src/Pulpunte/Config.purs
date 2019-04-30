@@ -9,7 +9,9 @@ import Prelude
 
 import Control.Alternative ((<|>))
 import Control.Monad.Error.Class (catchJust, throwError)
-import Data.Argonaut (decodeJson, encodeJson, (:=))
+import Data.Argonaut (Json, decodeJson, encodeJson, (.:), (.:?), (:=), (:=?))
+import Data.Array (catMaybes)
+import Data.Either (Either)
 import Data.Maybe (Maybe(..))
 import Data.String.Utils (startsWith)
 import Effect.Aff (Aff, error, message)
@@ -35,7 +37,9 @@ type Config =
   { name ∷ Maybe String
   , packageSet ∷ PackageSet
   , dependencies ∷ Array String
+  , devDependencies ∷ Maybe (Array String)
   , additions ∷ Maybe (Object PackageInfo)
+  , devAdditions ∷ Maybe (Object PackageInfo)
   }
 
 
@@ -53,7 +57,7 @@ initConfig = do
 
 
 readConfig ∷ Aff Config
-readConfig = eToAff ∘ decodeJson
+readConfig = eToAff ∘ decodeConfig
               =<< catchJust replaceError (readJson pulpunteJson) throwError
   where
     replaceError e =
@@ -61,14 +65,26 @@ readConfig = eToAff ∘ decodeJson
         then Just $ error msg.config.errNotExist
         else Nothing
 
+    decodeConfig ∷ Json → Either String Config
+    decodeConfig json = do
+      obj ← decodeJson json
+      { name: _, packageSet: _, dependencies: _, devDependencies: _, additions: _, devAdditions: _ }
+        <$> obj .:? "name"
+        <*> obj .: "packageSet"
+        <*> obj .: "dependencies"
+        <*> obj .:? "devDependencies"
+        <*> obj .:? "additions"
+        <*> obj .:? "devAdditions"
 
 writeConfig ∷ Config → Aff Unit
 writeConfig config = writeJson 2 pulpunteJson $ encodeJson $
-  fromFoldable
-    [ "name" := config.name
-    , "packageSet" := config.packageSet
-    , "dependencies" := config.dependencies
-    , "additions" := config.additions
+  fromFoldable $ catMaybes
+    [ "name" :=? config.name
+    , "packageSet" :=? Just config.packageSet
+    , "dependencies" :=? Just config.dependencies
+    , "devDependencies" :=? config.devDependencies
+    , "additions" :=? config.additions
+    , "devAdditions" :=? config.devAdditions
     ]
 
 
@@ -84,5 +100,9 @@ defaultConfig name pursVersion =
       , "effect"
       , "prelude"
       ]
-  , additions: Just empty
+  , devDependencies: Just
+      [ "psci-support"
+      ]
+  , additions: Nothing
+  , devAdditions: Nothing
   }
