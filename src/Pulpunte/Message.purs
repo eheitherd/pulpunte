@@ -36,7 +36,7 @@ desc =
         , "with a version (e.g. \"arrays@v5.2.1\", \"purescript/arrays@latest\")"
         ]
     , saveDev: "Save installed packages into devDependencies or devAdditions"
-  , jobs: "Parallelize jobs with specific number."
+    , jobs: "Parallelize jobs with specific number."
     }
   , uninstall:
     { command: "Uninstall packages from the project."
@@ -134,7 +134,7 @@ msg =
            "Option `"
         <> intercalate "`, `" options
         <> "` will be ignored,"
-        <> " because `--no-bundle` is specified."
+        <> " because `--skip-bundle` is specified."
     , fail: "Build failed."
     , done: "Build succeeded."
     }
