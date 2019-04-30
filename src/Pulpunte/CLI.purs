@@ -25,6 +25,7 @@ import Pulpunte.CLI.Build (build)
 import Pulpunte.CLI.Default (default)
 import Pulpunte.CLI.Init (init)
 import Pulpunte.CLI.Install (install)
+import Pulpunte.CLI.Repl (repl)
 import Pulpunte.CLI.Run (run)
 import Pulpunte.CLI.Test (test)
 import Pulpunte.CLI.Uninstall (uninstall)
@@ -55,6 +56,7 @@ cli = void $ runYargs $
       , buildCmd
       , runCmd
       , testCmd
+      , replCmd
       ]
 
 
@@ -129,6 +131,13 @@ testCmd = command "test" ["t"] (Just desc.test.command) $
       <*> cmdYargOptional "module" ["m"] (Just desc.build.entryModule) "" true
       <*> cmdFlag "watch" ["w"] (Just desc.build.watch)
       <*> cmdFlag "clean" ["c"] (Just desc.build.clean)
+
+
+replCmd ∷ Command GlobalOptions
+replCmd = command "repl" [] (Just desc.repl.command) $
+  launchCmd repl $
+    { clean: _ }
+      <$> cmdFlag "clean" ["c"] (Just desc.build.clean)
 
 
 launchCmd

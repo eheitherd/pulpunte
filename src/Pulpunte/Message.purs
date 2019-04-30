@@ -57,6 +57,9 @@ desc =
   , test:
     { command: "Run project tests."
     }
+  , repl:
+    { command: "Enter the interactive mode (PSCi)"
+    }
   }
 
 

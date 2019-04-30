@@ -3,15 +3,18 @@ module Pulpunte.Purs
   , compile
   , BundleOptions
   , bundle
+  , repl
   ) where
 
 import Prelude
 
+import Data.Array ((:))
 import Data.Maybe (Maybe, fromMaybe, maybe)
 import Data.Monoid (guard)
 import Effect.Aff (Aff)
-import Node.Execa (Options, execa)
+import Node.Execa (Options, execa, stderr, stdin, stdout)
 import Node.Path (FilePath, concat)
+import Prelude.Unicode ((∘))
 import Prim.Row (class Union)
 
 
@@ -60,3 +63,7 @@ bundle options jsPath bundleOptions = do
         <> maybe [] (\o → [ "-o", o]) bundleOptions.output
 
   execa options "purs" args
+
+
+repl ∷ Array FilePath → Aff Unit
+repl = void ∘ execa {stdin, stdout, stderr} "purs" ∘ ("repl" : _)
