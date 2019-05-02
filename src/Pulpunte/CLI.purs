@@ -25,6 +25,7 @@ import Pulpunte.CLI.Build (build)
 import Pulpunte.CLI.Default (default)
 import Pulpunte.CLI.Init (init)
 import Pulpunte.CLI.Install (install)
+import Pulpunte.CLI.List (list)
 import Pulpunte.CLI.Repl (repl)
 import Pulpunte.CLI.Run (run)
 import Pulpunte.CLI.Test (test)
@@ -57,6 +58,7 @@ cli = void $ runYargs $
       , runCmd
       , testCmd
       , replCmd
+      , listCmd
       ]
 
 
@@ -138,6 +140,14 @@ replCmd = command "repl" ["psci"] (Just desc.repl.command) $
   launchCmd repl $
     { clean: _ }
       <$> cmdFlag "clean" ["c"] (Just desc.build.clean)
+
+
+listCmd ∷ Command GlobalOptions
+listCmd = command "list" ["ls", "l"] (Just desc.list.command) $
+  launchCmd list $
+    { depth: _, flat: _ }
+      <$> cmdYarg "depth" ["d"] (Just desc.list.depth) (Left 20) true
+      <*> cmdFlag "flat" [] (Just desc.list.flat)
 
 
 launchCmd

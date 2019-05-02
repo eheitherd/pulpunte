@@ -60,6 +60,11 @@ desc =
   , repl:
     { command: "Enter the interactive mode (PSCi)"
     }
+  , list:
+    { command: "Print all installed packages and the dependency tree"
+    , depth: "Max depth of the dependency tree"
+    , flat: "Print all installed packages without the dependency tree"
+    }
   }
 
 
@@ -102,9 +107,6 @@ msg =
     , errNotExistInPackaeSet: \package →
            "Package " <> package
         <> " does not exist in package set."
-    , errDepNotExistInPackageSet: \package →
-           "Package " <> package <> " is depended on by another package"
-        <> " but not present in package set or additions."
     }
   , uninstall:
     { removedFromDeps: \packages →
@@ -117,9 +119,6 @@ msg =
            show num
         <> " package" <>  (if num == 1 then " has" else "s have")
         <> " been uninstalled."
-    , brokenDependencies: \package →
-           "Package " <> package <> " is depended on by another package"
-        <> " but not present in package set or additions."
     , errNotSpecified: "Pass the package names you want to uninstall."
     , errNotExistInDeps: \packages →
            "Package "
@@ -145,6 +144,12 @@ msg =
     { ok: "Tests OK."
     , ng: "Tests NG."
     }
+  , list:
+    { notInstalled: "not installed"
+    , installed: \tag → "installed " <> tag
+    , dev: "dev"
+    , addition: "addition"
+    }
   , config:
     { errNotExist:
            "Could not find a pulpunte.json file in the current directory."
@@ -157,6 +162,11 @@ msg =
   , package:
     { noTag: \url →
         "No tag in " <> url
+    }
+  , common:
+    { brokenDependencies: \package →
+          "Package " <> package <> " is depended on by another package"
+        <> " but not present in package set or additions."
     }
   }
 

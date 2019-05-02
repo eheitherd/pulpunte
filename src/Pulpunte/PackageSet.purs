@@ -2,21 +2,25 @@ module Pulpunte.PackageSet
   ( PackageSet
   , PackageInfo
   , Packages
-  , packageSetDir
+  , packageDir
   , getPackageSet
   , getPackageInfo
   , resolveDependencies
+  , PackageTree
+  , dependencyTree
   ) where
 
 import Prelude
 
 import Control.Alternative ((<|>))
+import Control.Comonad.Cofree (Cofree, (:<))
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import Control.Monad.Rec.Class (Step(..), tailRec)
 import Data.Argonaut (decodeJson)
 import Data.Array (any, snoc, uncons)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), maybe)
+import Data.Traversable (traverse)
 import Data.Tuple (fst)
 import Data.Tuple.Unicode (type (×), (×))
 import Effect.Aff (Aff, catchError, message)
@@ -54,14 +58,15 @@ jsonFile ∷ FilePath
 jsonFile = "packages.json"
 
 
-packageSetDir ∷ PackageSet → FilePath
-packageSetDir packageSet = concat [cacheRootDir, packageSet.set]
+packageDir ∷ PackageSet → PackageName → FilePath
+packageDir packageSet packageName
+  = concat [cacheRootDir, packageSet.set, packageName]
 
 
 getPackageSet ∷ PackageSet → Aff Packages
 getPackageSet packageSet = do
   let
-    setPath = concat [packageSetDir packageSet, setDir]
+    setPath = packageDir packageSet setDir
     jsonPath = concat [setPath, jsonFile]
 
   unlessM (exists jsonPath) do
@@ -131,3 +136,22 @@ resolve packages (packageList × depPackages) =
           Nothing → Done $ Left head
 
     Nothing → Done $ Right depPackages
+
+
+type PackageTree = Cofree Array (PackageName × PackageInfo)
+
+dependencyTree
+   ∷ Int
+  → Packages
+  → PackageList
+  → Either String (Array PackageTree)
+dependencyTree depth packages packageList
+  | depth <= 0 = Right []
+  | otherwise = traverse mkTree packageList
+
+  where
+    mkTree packageName
+      | Just info ← lookup packageName packages
+        = ((packageName × info) :< _)
+               <$> dependencyTree (depth - 1) packages info.dependencies
+      | otherwise = Left packageName

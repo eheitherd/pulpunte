@@ -10,20 +10,19 @@ import Data.Either (either)
 import Data.Foldable (for_)
 import Data.Function (on)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Profunctor.Strong ((&&&))
 import Data.Tuple (fst, snd)
-import Data.Tuple.Unicode ((×))
 import Effect.Aff (Aff)
 import Effect.Aff.Util (throwError')
 import Foreign.Object (empty, filterKeys, keys)
 import Node.FS.Aff (exists)
 import Node.FS.Extra (remove)
-import Node.Path (concat)
 import Prelude.Unicode ((∘))
 import Pulpunte.Config (Config, readConfig, writeConfig)
 import Pulpunte.Console (Console)
 import Pulpunte.Message (msg)
 import Pulpunte.Package (PackageName)
-import Pulpunte.PackageSet (getPackageSet, packageSetDir, resolveDependencies)
+import Pulpunte.PackageSet (getPackageSet, packageDir, resolveDependencies)
 
 type UninstallArgs =
   { packages ∷ Array PackageName
@@ -87,7 +86,6 @@ removePackageFiles console config newConfig specifiedPackages = do
       ifM (_ `elem` specifiedPackages)
         (throwError' ∘ msg.uninstall.errStillNeeded ∘ console.strong)
         ((specifiedPackages <$ _) ∘ console.warn
-                     ∘ msg.uninstall.brokenDependencies ∘ console.strong)
+                     ∘ msg.common.brokenDependencies ∘ console.strong)
 
-    addPath = \packageName →
-      packageName × concat [packageSetDir config.packageSet, packageName]
+    addPath = identity &&& packageDir config.packageSet

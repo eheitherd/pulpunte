@@ -17,13 +17,12 @@ import Foreign.Object (empty, keys, union)
 import Node.FS.Aff (exists)
 import Node.FS.Extra (remove)
 import Node.Git (cloneShallow)
-import Node.Path (concat)
 import Prelude.Unicode ((∘))
 import Pulpunte.Config (Config)
 import Pulpunte.Console (Console)
 import Pulpunte.Message (msg)
 import Pulpunte.Package (PackageName)
-import Pulpunte.PackageSet (PackageSet, Packages, getPackageSet, packageSetDir, resolveDependencies)
+import Pulpunte.PackageSet (PackageSet, Packages, getPackageSet, packageDir, resolveDependencies)
 
 
 installAll ∷ Console → Int → Config → Aff Unit
@@ -60,7 +59,7 @@ installPackages console jobs packageSet additions packageList = do
     console.info $ msg.install.done num
 
   where
-    addPath package = concat [packageSetDir packageSet, fst package] × package
+    addPath package = packageDir packageSet (fst package) × package
 
     filterUninstalled = filterA $ map not ∘ exists ∘ fst
 
@@ -75,5 +74,5 @@ installPackages console jobs packageSet additions packageList = do
     errNotExistInPackaeSet packageName =
       let message = if packageName `elem` packageList
             then msg.install.errNotExistInPackaeSet
-            else msg.install.errDepNotExistInPackageSet
+            else msg.common.brokenDependencies
        in throwError' $ message $ console.strong packageName
