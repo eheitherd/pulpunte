@@ -134,7 +134,7 @@ testCmd = command "test" ["t"] (Just desc.test.command) $
 
 
 replCmd ∷ Command GlobalOptions
-replCmd = command "repl" [] (Just desc.repl.command) $
+replCmd = command "repl" ["psci"] (Just desc.repl.command) $
   launchCmd repl $
     { clean: _ }
       <$> cmdFlag "clean" ["c"] (Just desc.build.clean)
