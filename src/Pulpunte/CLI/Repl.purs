@@ -20,8 +20,8 @@ psciDir = ".psci_modules"
 
 
 repl ∷ Console → ReplArgs → Aff Unit
-repl console args = do
-  when args.clean $ remove psciDir
+repl console { clean } = do
+  when clean $ remove psciDir
 
   P.repl
     [ "src/**/*.purs"

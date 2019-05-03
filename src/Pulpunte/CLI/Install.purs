@@ -5,7 +5,7 @@ module Pulpunte.CLI.Install
 
 import Prelude
 
-import Data.Array (catMaybes, filter, group, nubByEq, null, sort, sortWith, (\\))
+import Data.Array (catMaybes, filter, group, nubByEq, null, sort, (\\))
 import Data.Array.NonEmpty (head, length)
 import Data.Array.Unicode ((∩))
 import Data.Function (on)
@@ -110,5 +110,5 @@ updateConfig saveDev newAdditionList newPackages config =
     updateAddition additions newAdditionList' =
       if null newAdditionList'
         then additions
-        else Just $ fromFoldable $ sortWith fst $ nubByEq (eq `on` fst)
+        else Just $ fromFoldable $ sort $ nubByEq (eq `on` fst)
                   $ newAdditionList' <> toUnfoldable (fromMaybe empty additions)
