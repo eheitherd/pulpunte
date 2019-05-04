@@ -14,10 +14,11 @@ import Node.FS.Aff (exists)
 import Node.FS.Extra (outputFileText)
 import Node.Path (FilePath, concat)
 import Pulpunte.Cache (cleanCache)
-import Pulpunte.Install (installAll)
 import Pulpunte.Config (initConfig)
 import Pulpunte.Console (Console)
+import Pulpunte.Install (installAll)
 import Pulpunte.Message (msg)
+import Pulpunte.Purs (whichPurs)
 
 
 type InitArgs =
@@ -28,6 +29,7 @@ type InitArgs =
 init ∷ Console → InitArgs → Aff Unit
 init console { force, skipInstall } = do
   unless force $ throwErrorWhenProjectExists files
+  _ ← whichPurs
 
   console.info msg.init.generating
 

@@ -21,6 +21,8 @@ psciDir = ".psci_modules"
 
 repl ∷ Console → ReplArgs → Aff Unit
 repl console { clean } = do
+  _ ← P.whichPurs
+
   when clean $ remove psciDir
 
   P.repl

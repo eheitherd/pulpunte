@@ -1,5 +1,6 @@
 module Pulpunte.Purs
-  ( version
+  ( whichPurs
+  , version
   , compile
   , BundleOptions
   , bundle
@@ -12,10 +13,17 @@ import Data.Array ((:))
 import Data.Maybe (Maybe, fromMaybe, maybe)
 import Data.Monoid (guard)
 import Effect.Aff (Aff)
+import Effect.Aff.Util (mapErrorMsg)
 import Node.Execa (Options, execa, stderr, stdin, stdout)
 import Node.Path (FilePath, concat)
+import Node.Which (which)
 import Prelude.Unicode ((∘))
 import Prim.Row (class Union)
+import Pulpunte.Message (msg)
+
+
+whichPurs ∷ Aff String
+whichPurs = mapErrorMsg (const msg.purs.notFound) $ which "purs"
 
 
 version ∷ Aff String

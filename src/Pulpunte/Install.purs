@@ -10,7 +10,7 @@ import Data.Either (either)
 import Data.Maybe (fromMaybe)
 import Data.Tuple (fst)
 import Data.Tuple.Unicode ((×))
-import Effect.Aff (Aff, catchError, throwError)
+import Effect.Aff (Aff, catchError, message)
 import Effect.Aff.Parallel (parallelize_)
 import Effect.Aff.Util (throwError')
 import Foreign.Object (empty, keys, union)
@@ -63,13 +63,13 @@ installPackages console jobs packageSet additions packageList = do
 
     filterUninstalled = filterA $ map not ∘ exists ∘ fst
 
-    installPackage setRepo (path × (package × info)) = do
-      console.log $ msg.install.installing package
+    installPackage setRepo (path × (packageName × info)) = do
+      console.log $ msg.install.installing packageName
       catchError (cloneShallow path info.repo info.version)
         \e → do
           -- If an error occurs, isomorphicGit may leave the directory undeleted.
           remove path
-          throwError e
+          throwError' $ console.strong packageName <> ": " <> message e
 
     errNotExistInPackaeSet packageName =
       let message = if packageName `elem` packageList

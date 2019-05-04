@@ -15,7 +15,7 @@ import Node.FS.Extra (remove)
 import Node.Path (FilePath)
 import Pulpunte.Console (Console)
 import Pulpunte.Message (msg)
-import Pulpunte.Purs (bundle, compile)
+import Pulpunte.Purs (bundle, compile, whichPurs)
 
 
 type RunOptions =
@@ -27,6 +27,8 @@ type RunOptions =
 
 run ∷ Console → RunOptions → Array FilePath → Aff Unit
 run console options srcPaths = do
+  _ ← whichPurs
+
   when options.clean $ remove options.output
 
   output ← flip catchError (\_ → throwError' msg.build.fail) do

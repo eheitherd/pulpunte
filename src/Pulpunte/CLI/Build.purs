@@ -16,7 +16,7 @@ import Prelude.Unicode ((∘))
 import Pulpunte.Builder (runBuilder)
 import Pulpunte.Console (Console)
 import Pulpunte.Message (msg)
-import Pulpunte.Purs (bundle, compile)
+import Pulpunte.Purs (bundle, compile, whichPurs)
 
 
 type BuildArgs =
@@ -31,6 +31,8 @@ type BuildArgs =
 
 build ∷ Console → BuildArgs → Aff Unit
 build console args = do
+  _ ← whichPurs
+
   let optionsForBundle
          = maybe [] (const ["--to"]) args.to
         <> maybe [] (const ["--module"]) args.entryModule

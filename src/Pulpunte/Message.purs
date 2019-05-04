@@ -167,6 +167,12 @@ msg =
     { noTag: \url →
         "No tag in " <> url
     }
+  , purs:
+    { notFound:
+           "The executable file `purs` can't be found."
+        <> " You need to execute `npm install -g purescript`"
+        <> " or install it by other means."
+    }
   , common:
     { brokenDependencies: \package →
           "Package " <> package <> " is depended on by another package"
