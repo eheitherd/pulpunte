@@ -77,31 +77,31 @@ defaultCmd ∷ Command GlobalOptions
 defaultCmd = command "$0" [] Nothing $
   launchCmd default $
     { version: _ }
-    <$> cmdFlag "version" ["v"] (Just desc.default.version)
+      <$> cmdFlag "version" ["v"] (Just desc.default.version)
 
 
 initCmd ∷ Command GlobalOptions
 initCmd = command "init" [] (Just desc.init.command) $
   launchCmd init $
     { force: _, skipInstall: _ }
-    <$> cmdFlag "force" ["f"] (Just desc.init.force)
-    <*> cmdFlag "skip-install" [] (Just desc.init.skipInstall)
+      <$> cmdFlag "force" ["f"] (Just desc.init.force)
+      <*> cmdFlag "skip-install" [] (Just desc.init.skipInstall)
 
 
 installCmd ∷ Command GlobalOptions
 installCmd = command "install" ["i"] (Just desc.install.command) $
   launchCmd install $
     { packages: _, saveDev: _, jobs: _ }
-    <&> variadicArg "packages" (Just desc.install.packages)
-    <*> cmdFlag "save-dev" ["D"] (Just desc.install.saveDev)
-    <*> cmdYarg "jobs" ["j"] (Just desc.install.jobs) (Left 8) true
+      <&> variadicArg "packages" (Just desc.install.packages)
+      <*> cmdFlag "save-dev" ["D"] (Just desc.install.saveDev)
+      <*> cmdYarg "jobs" ["j"] (Just desc.install.jobs) (Left 8) true
 
 
 uninstallCmd ∷ Command GlobalOptions
 uninstallCmd = command "uninstall" ["u"] (Just desc.uninstall.command) $
   launchCmd uninstall $
     { packages: _ }
-    <&> variadicArg "packages" Nothing
+      <&> variadicArg "packages" Nothing
 
 
 buildCmd ∷ Command GlobalOptions
