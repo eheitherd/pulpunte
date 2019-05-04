@@ -17,12 +17,13 @@ import Node.Process (exit)
 import Node.TermSize (termSize)
 import Node.Yargs (runYargs)
 import Node.Yargs.Applicative (Y, flag, yarg)
-import Node.Yargs.Command (CmdY, Command, cmdFlag, cmdYarg, cmdYargOptional, command, commands, variadicArg, (<&>))
+import Node.Yargs.Command (CmdY, Command, cmdFlag, cmdYarg, cmdYargOptional, command, commands, requiredArg, variadicArg, (<&>))
 import Node.Yargs.Setup (alias, strict, usage, wrap)
 import Node.Yargs.Setup.Extra (defaultVersion, runEffectYargsSetup)
 import Prelude.Unicode ((∘))
 import Pulpunte.CLI.Build (build)
 import Pulpunte.CLI.Default (default)
+import Pulpunte.CLI.Help (help)
 import Pulpunte.CLI.Init (init)
 import Pulpunte.CLI.Install (install)
 import Pulpunte.CLI.List (list)
@@ -59,6 +60,7 @@ cli = void $ runYargs $
       , testCmd
       , replCmd
       , listCmd
+      , helpCmd
       ]
 
 
@@ -148,6 +150,13 @@ listCmd = command "list" ["ls", "l"] (Just desc.list.command) $
     { depth: _, flat: _ }
       <$> cmdYarg "depth" ["d"] (Just desc.list.depth) (Left 20) true
       <*> cmdFlag "flat" [] (Just desc.list.flat)
+
+
+helpCmd ∷ Command GlobalOptions
+helpCmd = command "help" ["h"] (Just desc.help.command) $
+  launchCmd help $
+    { command: _ }
+      <&> requiredArg "command" (Just desc.help.args)
 
 
 launchCmd

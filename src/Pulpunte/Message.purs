@@ -65,6 +65,10 @@ desc =
     , depth: "Max depth of the dependency tree"
     , flat: "Print all installed packages without the dependency tree"
     }
+  , help:
+    { command: "Display help information about a specific command"
+    , args: "Display help information about this command"
+    }
   }
 
 
