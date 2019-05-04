@@ -6,8 +6,7 @@ module Pulpunte.CLI.Default
 import Prelude
 
 import Effect.Aff (Aff)
-import Effect.Class.Console (log)
-import Node.Execa (execa)
+import Node.Execa (execa, stderr, stdout)
 import Pulpunte.Console (Console)
 import Pulpunte.NpmPackage (package)
 import Pulpunte.Purs as P
@@ -25,8 +24,8 @@ default console { version } =
 
     where
       showVersion = do
-        log $ "Pulpunte version " <> package.version
+        console.print $ "Pulpunte version " <> package.version
         pursVersion ← P.version
-        log $ "purs version " <> pursVersion
+        console.print $ "purs version " <> pursVersion
 
-      showHelp = log =<< execa {} "pulpunte" ["-h"]
+      showHelp = void $ execa {stdout, stderr} "pulpunte" ["-h"]
