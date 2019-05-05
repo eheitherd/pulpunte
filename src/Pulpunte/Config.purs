@@ -8,14 +8,13 @@ module Pulpunte.Config
 import Prelude
 
 import Control.Alternative ((<|>))
-import Control.Monad.Error.Class (catchJust, throwError)
 import Data.Argonaut (Json, decodeJson, encodeJson, (.:), (.:?), (:=?))
 import Data.Array (catMaybes)
 import Data.Either (Either)
 import Data.Maybe (Maybe(..))
 import Data.String.Utils (startsWith)
-import Effect.Aff (Aff, error, message)
-import Effect.Aff.Util (eToAff)
+import Effect.Aff (Aff)
+import Effect.Aff.Util (eToAff, mapErrorMsg)
 import Effect.Class (liftEffect)
 import Foreign.Object (Object, fromFoldable)
 import Node.FS.Extra (readJson, writeJson)
@@ -57,13 +56,11 @@ initConfig = do
 
 
 readConfig ∷ Aff Config
-readConfig = eToAff ∘ decodeConfig
-              =<< catchJust replaceError (readJson pulpunteJson) throwError
+readConfig =
+  eToAff ∘ decodeConfig =<< mapErrorMsg replaceError (readJson pulpunteJson)
   where
     replaceError e =
-      if startsWith "ENOENT:" (message e)
-        then Just $ error msg.config.errNotExist
-        else Nothing
+      if startsWith "ENOENT:" e then msg.config.errNotExist else e
 
     decodeConfig ∷ Json → Either String Config
     decodeConfig json = do

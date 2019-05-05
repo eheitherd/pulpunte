@@ -6,8 +6,8 @@ module Pulpunte.Run
 import Prelude
 
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff, catchError)
-import Effect.Aff.Util (throwError')
+import Effect.Aff (Aff)
+import Effect.Aff.Util (mapErrorMsg)
 import Effect.Class (liftEffect)
 import Effect.Eval (eval)
 import Node.Execa (stderr)
@@ -31,8 +31,7 @@ run console options srcPaths = do
 
   when options.clean $ remove options.output
 
-  output ← flip catchError (\_ → throwError' msg.build.fail) do
-
+  output ← mapErrorMsg (const msg.build.fail) do
     compile { stdout: stderr, stderr } options.output srcPaths
     console.newline
 

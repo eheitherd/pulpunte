@@ -7,8 +7,8 @@ import Prelude
 
 import Data.Array (null)
 import Data.Maybe (Maybe, isNothing, maybe)
-import Effect.Aff (Aff, catchError)
-import Effect.Aff.Util (throwError')
+import Effect.Aff (Aff)
+import Effect.Aff.Util (mapErrorMsg)
 import Node.Execa (stderr, stdout)
 import Node.FS.Extra (remove)
 import Node.Path (FilePath)
@@ -48,7 +48,7 @@ build console args = do
         ]
 
   runBuilder console args.watch srcPaths \paths →
-    flip catchError (\_ → throwError' msg.build.fail) do
+    mapErrorMsg (const msg.build.fail) do
       compile { stdout: stderr, stderr } args.output paths
       console.newline
 

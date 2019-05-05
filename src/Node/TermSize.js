@@ -1,3 +1,5 @@
 'use strict'
 
-exports.termSize = require('term-size');
+const termSize = require('term-size');
+
+exports.termSize = termSize;
