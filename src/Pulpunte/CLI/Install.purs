@@ -20,6 +20,7 @@ import Effect.Aff.Util (throwError')
 import Foreign.Object (empty, fromFoldable, keys, toUnfoldable)
 import Prelude.Unicode ((∘))
 import Pulpunte.CLI.Install.Parser (parsePackage)
+import Pulpunte.Cache (cleanCache)
 import Pulpunte.Config (Config, readConfig, writeConfig)
 import Pulpunte.Console (Console)
 import Pulpunte.Install (installAll, installPackages)
@@ -32,18 +33,24 @@ type InstallArgs =
   { packages ∷ Array String
   , saveDev ∷ Boolean
   , jobs ∷ Int
+  , clean ∷ Boolean
   }
 
 
 install ∷ Console → InstallArgs → Aff Unit
-install console { packages: packageList, saveDev, jobs } = do
+install console { packages: packageList, saveDev, jobs, clean } = do
   config ← readConfig
 
   if null packageList
     then do
       when saveDev $ console.warn msg.install.ignoreSaveDev
+      when clean do
+        console.log msg.install.deletingCache
+        console.newline
+        cleanCache
       installAll console jobs config
-    else
+    else do
+      when clean $ console.warn msg.install.ignoreClean
       installNew console jobs config saveDev packageList
 
 

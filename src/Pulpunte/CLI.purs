@@ -91,10 +91,11 @@ initCmd = command "init" [] (Just desc.init.command) $
 installCmd ∷ Command GlobalOptions
 installCmd = command "install" ["i"] (Just desc.install.command) $
   launchCmd install $
-    { packages: _, saveDev: _, jobs: _ }
+    { packages: _, saveDev: _, jobs: _, clean: _ }
       <&> variadicArg "packages" (Just desc.install.packages)
       <*> cmdFlag "save-dev" ["D"] (Just desc.install.saveDev)
       <*> cmdYarg "jobs" ["j"] (Just desc.install.jobs) (Left 8) true
+      <*> cmdFlag "clean" ["c"] (Just desc.install.clean)
 
 
 uninstallCmd ∷ Command GlobalOptions

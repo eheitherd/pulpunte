@@ -37,6 +37,7 @@ desc =
         ]
     , saveDev: "Save installed packages into devDependencies or devAdditions"
     , jobs: "Parallelize jobs with specific number."
+    , clean: "Delete all installed packages before installing"
     }
   , uninstall:
     { command: "Uninstall packages from the project."
@@ -84,6 +85,7 @@ msg =
   , install:
     { currentPackageSet: \url version →
            "Package set: " <> version <> " (" <> url <> ")"
+    , deletingCache: "Deleting the caches"
     , installing: \package → "Installing " <> package
     , done: \(num ∷ Int) →
            show num
@@ -93,6 +95,9 @@ msg =
     , ignoreSaveDev:
            "Option `--save-dev` will be ignored,"
         <> " because no packages are specified."
+    , ignoreClean:
+           "Option `--clean` will be ignored,"
+        <> " because some packages are specified."
     , alreadyInstalled: \packages →
            "Package "
         <> intercalate ", " packages
