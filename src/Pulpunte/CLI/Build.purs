@@ -43,8 +43,8 @@ build console args = do
   when args.clean $ remove args.output
 
   let srcPaths =
-        [ "src/**/*.purs"
-        , ".pulpunte/*/*/src/**/*.purs"
+        [ "src"
+        , ".pulpunte/*/*/src"
         ]
 
   runBuilder console args.watch srcPaths \paths →

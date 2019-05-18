@@ -17,7 +17,7 @@ type RunArgs = RunOptions
 run ∷ Console → RunArgs → Aff Unit
 run console args =
   let srcPaths =
-        [ "src/**/*.purs"
-        , ".pulpunte/*/*/src/**/*.purs"
+        [ "src"
+        , ".pulpunte/*/*/src"
         ]
    in runBuilder console args.watch srcPaths $ R.run console args

@@ -19,13 +19,18 @@ runBuilder
   → (Array FilePath → Aff Unit)
   → Aff Unit
 runBuilder console watch srcPaths builder =
-  if not watch
-    then builder srcPaths
-    else do
-      let run = catchError (builder srcPaths) \e → console.error $ message e
-          repeat = liftEffect $ C.watch srcPaths \watcher _ → launchAff_ do
-            liftEffect $ close watcher
-            run
-            repeat
-      run
-      repeat
+  let
+    srcPath = (_ <> "/**/*.purs")
+    srcPaths' =  srcPath <$> srcPaths
+  in
+    if not watch
+      then builder srcPaths'
+      else do
+        let watchPaths = ([srcPath, (_ <> "/**/*.js")] <@> _) =<< srcPaths
+            run = catchError (builder srcPaths') \e → console.error $ message e
+            repeat = liftEffect $ C.watch watchPaths \watcher _ → launchAff_ do
+              liftEffect $ close watcher
+              run
+              repeat
+        run
+        repeat
