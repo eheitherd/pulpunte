@@ -13,7 +13,7 @@ import Control.Alternative ((<|>))
 import Data.Argonaut (decodeJson)
 import Data.Array (catMaybes, findLastIndex, sort, (!!))
 import Data.Either (hush)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.String (Pattern(..), stripPrefix)
 import Data.String.Regex (regex, test)
 import Data.String.Regex.Flags (noFlags)
@@ -68,8 +68,10 @@ getDependencies temporaryDir packageName url version = do
 
   checkOut path version (Just "*.{json,dhall}")
 
-  getDependenciesFromBower path
-  <|> pure []
+  getDependenciesFromPulpunte path
+    <|> getDependenciesFromPscPackage path
+    <|> getDependenciesFromBower path
+    <|> pure []
 
 
 temporaryClone ∷ FilePath → PackageName → URL → Aff FilePath
@@ -77,6 +79,30 @@ temporaryClone tempraryDir packageName url = do
   let path = concat [ tempraryDir, packageName ]
   unlessM (exists path) $ clone path url { noCheckOut: true }
   pure path
+
+
+type PulpunteJson =
+  { dependencies ∷ Maybe (Array String)
+  }
+
+getDependenciesFromPulpunte ∷ FilePath → Aff (Array PackageName)
+getDependenciesFromPulpunte path = do
+  let jsonPath = concat [ path, "pulpunte.json" ]
+  unlessM (exists jsonPath) $ throwError' "No pulpunte.json"
+  (pulpunteJson ∷ PulpunteJson) ← eToAff ∘ decodeJson =<< readJson jsonPath
+  pure $ fromMaybe [] pulpunteJson.dependencies
+
+
+type PscPackageJson =
+  { depends ∷ Maybe (Array String)
+  }
+
+getDependenciesFromPscPackage ∷ FilePath → Aff (Array PackageName)
+getDependenciesFromPscPackage path = do
+  let jsonPath = concat [ path, "psc-package.json" ]
+  unlessM (exists jsonPath) $ throwError' "No psc-package.json"
+  (pscPackageJson ∷ PscPackageJson) ← eToAff ∘ decodeJson =<< readJson jsonPath
+  pure $ fromMaybe [] pscPackageJson.depends
 
 
 type BowerJson =
